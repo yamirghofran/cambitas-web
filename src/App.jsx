@@ -9,14 +9,11 @@ import AppRouter from './routers/AppRouter';
 
 
 function App() {
-  const [count, setCount] = useState(0)
 
   return (
     <>
     <QueryClientProvider client={queryClient}>
-    <Router>
       <AppRouter />
-    </Router>
     </QueryClientProvider>
     </>
   )
