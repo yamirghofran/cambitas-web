@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom';
 import { PlusCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Search as SearchIcon, Filter as FilterIcon } from "lucide-react";
 import EmployeesTable from '@/components/Employees/EmployeesTable';
+import { getAllUsers } from '@/util/functions/Users';
 
 const tabs = [
   { name: "All Employees" },
@@ -21,6 +22,20 @@ function classNames(...classes) {
 
 function Employees() {
   const [currentTab, setCurrentTab] = useState('All Employees');
+  const [employees, setEmployees] = useState([]);
+
+  const fetchEmployees = async (companyID) => {
+    try {
+      const fetchedEmployees = await getAllUsers(companyID);
+      setEmployees(fetchedEmployees);
+    } catch (error) {
+      console.error("Failed to fetch employees:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchEmployees('123456');
+  }, []);
 
   return (
     <div className='h-full w-full'>
@@ -100,7 +115,7 @@ function Employees() {
         </div>
       </div>
       <div className='mt-4'>
-        <EmployeesTable />
+        <EmployeesTable employees={employees} />
       </div>
     </div>
   )

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
@@ -10,8 +10,8 @@ import {
   Table,
 } from "@/components/ui/table";
 import { AvatarImage, AvatarFallback, Avatar } from "@/components/ui/avatar";
-
 import ProfilePicture from "@/assets/images/profiles/cambitas-profile-1.png";
+import { getUsersByProjectId } from "@/util/functions/Users";
 
 function WorkerRow({ name, role, phoneNumber, email }) {
   return (
@@ -50,7 +50,22 @@ const workers = [
 
 
 
-function ProjectWorkers() {
+function ProjectWorkers({ workersUserIDs, projectId }) {
+  const [workers, setWorkers] = useState([]);
+
+  const companyID = "123456"; // Replace with actual company ID
+
+  const fetchWorkers = async (companyID, projectID) => {
+    if (projectId) {
+      const fetchedWorkers = await getUsersByProjectId(companyID, projectID); // Replace 'yourCompanyID' with actual company ID
+      setWorkers(fetchedWorkers);
+    }
+  };
+
+  useEffect(() => {
+    fetchWorkers(companyID, projectId);
+  }, [projectId]);
+
   return (
     <div className="bg-white p-8 rounded-md">
       <h1 className="text-2xl font-semibold mb-4">Workers</h1>

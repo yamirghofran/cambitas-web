@@ -6,6 +6,14 @@ import { Search as SearchIcon, Filter as FilterIcon } from "lucide-react";
 import ProjectInventoryItem from "@/components/Projects/ProjectInventoryItem";
 import ExampleInventoryImage from "@/assets/images/inventory/drill.png";
 import InventoryItem from "@/components/Inventory/InventoryItem";
+import { Helmet } from "react-helmet";
+import { getAllCompanyInventoryItems } from '@/util/functions/InventoryItems';
+import { useState, useEffect } from 'react';
+
+
+
+// Call this function where you need to fetch the inventory items
+
 
 const tabs = [
   { name: "Tools", current: true },
@@ -18,7 +26,27 @@ function classNames(...classes) {
 }
 
 function Inventory() {
+  const [inventoryItems, setInventoryItems] = useState([]);
+
+  const fetchInventoryItems = async (companyID) => {
+    try {
+      const items = await getAllCompanyInventoryItems(companyID);
+      console.log('Inventory Items:', items);
+      setInventoryItems(items);
+      return items;
+    } catch (error) {
+      console.error('Failed to fetch inventory items:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchInventoryItems('123456');
+  }, []);
   return (
+    <>
+    <Helmet>
+      <title>Inventory</title>
+    </Helmet>
     <div className="h-full w-full">
       <div className="relative border-b border-gray-200 pb-5 sm:pb-0">
         <div className="md:flex md:items-center md:justify-between">
@@ -99,17 +127,13 @@ function Inventory() {
         <h2 className="text-xl font-semibold mt-2 mb-1">Power tools</h2>
         <p className="text-sm text-green-800 underline">See all</p>
         </div>
-          <div className="grid grid-cols-7 gap-2">
-            <InventoryItem />
-            <InventoryItem />
-            <InventoryItem />
-            <InventoryItem />
-            <InventoryItem />
-            <InventoryItem />
-            <InventoryItem />
+          <div className="grid grid-cols-3 md:grid-cols-5 lg:grid-cols-7 gap-4">
+            {inventoryItems.map((item) => (
+              <InventoryItem key={item.id} item={item} />
+            ))}
           </div>
       </div>
-      <div className="w-full border-b border-gray-200 pb-2">
+      {/* <div className="w-full border-b border-gray-200 pb-2">
         <div className="h-full flex justify-between items-center">
         <h2 className="text-xl font-semibold mt-2 mb-1">Other tools</h2>
         <p className="text-sm text-green-800 underline">See all</p>
@@ -138,8 +162,10 @@ function Inventory() {
             <InventoryItem />
             <InventoryItem />
           </div>
-      </div>
+      </div> */}
     </div>
+    </>
+    
   );
 }
 

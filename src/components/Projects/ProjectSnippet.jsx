@@ -2,10 +2,12 @@ import React from "react";
 import { MapPin, ExternalLink } from "lucide-react";
 function ProjectSnippet({
   profilePicture,
+  managerName,
   title,
-  location,
+  address,
   mapUrl,
 }) {
+  const {latitude, longitude} = location;
   return (
     <div className="flex h-full w-72 flex-col rounded border bg-white">
       <div className="flex w-full items-center justify-start border-b border-dashed">
@@ -15,7 +17,7 @@ function ProjectSnippet({
           className="mx-2 h-10 w-10"
         />
         <div className="flex flex-col px-1 py-2">
-          <h4 className="text-base">Phoenix Baker</h4>
+          <h4 className="text-base">{managerName}</h4>
           <p className="text-sm text-slate-600">Manager</p>
         </div>
       </div>
@@ -28,7 +30,7 @@ function ProjectSnippet({
           />
           <div className="flex flex-col px-1 py-2">
             <h4 className="text-base">{title}</h4>
-            <p className="text-sm text-slate-600">{location}</p>
+            <p className="text-sm text-slate-600">{address}</p>
           </div>
         </div>
       </div>

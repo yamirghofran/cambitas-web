@@ -15,7 +15,7 @@ import { Link } from "react-router-dom";
 
 
   
-  const employees = [
+  const sampleEmployees = [
     {
       id: 1,
       name: "Olivia Rhye",
@@ -108,7 +108,7 @@ import { Link } from "react-router-dom";
     },
   ];
   
-  function EmployeesTableComponent() {
+  function EmployeesTableComponent({ employees }) {
 
     return (
       <div className="bg-white p-6 shadow rounded-lg">
@@ -116,8 +116,8 @@ import { Link } from "react-router-dom";
         <Table>
       <TableHeader>
         <TableRow>
-          <TableHead>S.No</TableHead>
-          <TableHead>Employees</TableHead>
+          {/* <TableHead>S.No</TableHead> */}
+          <TableHead>Employee</TableHead>
           <TableHead>Role</TableHead>
           <TableHead>Phone Number</TableHead>
           <TableHead>Action</TableHead>
@@ -132,39 +132,39 @@ import { Link } from "react-router-dom";
     );
   }
 
-  function EmployeesTableRow({ id=1, name, email, role, phoneNumber, avatarSrc, avatarFallback }) {
+  function EmployeesTableRow({ uid, displayName, email, role, mobileNo, profileImageUrl, avatarFallback='EM' }) {
     return (
-      <TableRow key={id}>
-        <TableCell>{id}</TableCell>
+      <TableRow key={uid}>
+        {/* <TableCell>{uid}</TableCell> */}
         <TableCell>
           <div className="flex items-center space-x-3">
             <Avatar>
-              {avatarSrc ? <AvatarImage alt={name} src={avatarSrc} /> : <AvatarFallback>{avatarFallback}</AvatarFallback>}
+              {profileImageUrl ? <AvatarImage alt={displayName} src={profileImageUrl} /> : <AvatarFallback>{avatarFallback}</AvatarFallback>}
             </Avatar>
             <div>
-              <div className="font-medium">{name}</div>
+              <div className="font-medium">{displayName}</div>
               <div className="text-sm text-gray-500">{email}</div>
             </div>
           </div>
         </TableCell>
         <TableCell>{role}</TableCell>
-        <TableCell>{phoneNumber}</TableCell>
+        <TableCell>{mobileNo}</TableCell>
         <TableCell>
           <div className="flex items-center gap-x-4 space-x-2">
-            <Link to={`/employees/${id}/edit`}><PencilIcon className="h-5 w-5 text-gray-500 hover:cursor-pointer hover:text-black" /></Link>
+            <Link to={`/employees/${uid}/edit`}><PencilIcon className="h-5 w-5 text-gray-500 hover:cursor-pointer hover:text-black" /></Link>
             <TrashIcon className="h-5 w-5 text-gray-500 hover:cursor-pointer hover:text-black" />
-            <Link to={`/employees/${id}`}><Button variant="ghost">View Details</Button></Link>
+            <Link to={`/employees/${uid}`}><Button variant="ghost">View Details</Button></Link>
           </div>
         </TableCell>
       </TableRow>
     );
   }
   
-  export default function EmployeesTable() {
+  export default function EmployeesTable({ employees }) {
     return (
       <div className="bg-white p-6 shadow rounded-lg">
         <div className="overflow-x-auto">
-          <EmployeesTableComponent />
+          <EmployeesTableComponent employees={employees} />
         </div>
         <div className="flex justify-between items-center">
           <Button variant="ghost">Previous</Button>

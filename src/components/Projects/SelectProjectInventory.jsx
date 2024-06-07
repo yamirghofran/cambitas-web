@@ -3,28 +3,11 @@ import { Card, CardContent } from "@/components/ui/card";
 
 import ExampleInventoryImage from "@/assets/images/inventory/drill.png";
 
-function ProjectInventoryItem({ item }) {
-  console.log("Item", item);
-  const { 
-    additionalInfo = '',
-    categoryID = '',
-    currentHolderID = '',
-    currentHolderName = '',
-    currentHolderProfileImageURL = '',
-    currentLocation = '',
-    dateAdded = '',
-    imagesUrls = [],
-    isAvailable = false,
-    isExpired = false,
-    itemType = '',
-    materialSpecifics = '',
-    name = '',
-    nameTrimmed = '',
-    projectID = '',
-    projectName = '',
-    toolSpecifics = '',
-    uploadedBy = '',
-   } = item;
+function classNames(...classes) {
+  return classes.filter(Boolean).join(' ')
+}
+
+function SelectProjectInventory({ availableInventory }) {
   return (
     <div className="w-full rounded-lg border overflow-hidden bg-white">
       <img
@@ -47,4 +30,4 @@ function ProjectInventoryItem({ item }) {
   );
 }
 
-export default ProjectInventoryItem;
+export default SelectProjectInventory;

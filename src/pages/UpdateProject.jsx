@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import {
   ArrowLeft,
   Circle,
@@ -53,7 +53,7 @@ import ProjectInventoryItem from "@/components/Projects/ProjectInventoryItem";
 import { Filter as FilterIcon } from "lucide-react";
 import {getAllUsers} from "@/util/functions/Users"
 import {getAllCompanyInventoryItems} from "@/util/functions/InventoryItems"
-import { addProject } from "@/util/functions/Projects";
+import { updateProject } from "@/util/functions/Projects";
 import { addProjectToUser } from "@/util/functions/Users";
 import { assignProjectToInventoryItem } from "@/util/functions/InventoryItems";
 import { toast } from "sonner";
@@ -502,7 +502,30 @@ function ProjectInventoryForm({ inventory, setInventory, availableInventory }) {
   );
 }
 
-function AddProject() {
+function detectWorkerChanges(currentWorkers, updatedWorkers) {
+    // Convert both arrays to Sets for easier comparison
+    const currentSet = new Set(currentWorkers);
+    const updatedSet = new Set(updatedWorkers);
+
+    // Find workers that are new by filtering the updated set
+    // to find IDs not in the current set
+    const newWorkers = Array.from(updatedSet).filter(id => !currentSet.has(id));
+
+    // Find workers that were removed by filtering the current set
+    // to find IDs not in the updated set
+    const removedWorkers = Array.from(currentSet).filter(id => !updatedSet.has(id));
+
+    return { newWorkers, removedWorkers };
+}
+
+// Usage example
+const currentWorkers = ['id1', 'id2', 'id3']; // IDs from database
+const updatedWorkers = ['id2', 'id3', 'id4']; // IDs from useState
+
+const { newWorkers, removedWorkers } = detectWorkerChanges(currentWorkers, updatedWorkers);
+
+function UpdateProject() {
+  const { project_id } = useParams();
   const [projectName, setProjectName] = useState("");
   const [projectDescription, setProjectDescription] = useState("");
   const [projectAddress, setProjectAddress] = useState("");
@@ -518,15 +541,30 @@ function AddProject() {
   const [endDate, setEndDate] = useState(new Date());
   const [employees, setEmployees] = useState([]);
   const navigate = useNavigate();
-  const fetchInventory = async (companyID) => {
-    try {
-      const inventoryItems = await getAllCompanyInventoryItems(companyID); // Replace 'companyID' and 'projectID' with actual IDs
-      console.log("Inventory Items:", inventoryItems);
-      setAvailableInventory(inventoryItems);
-    } catch (error) {
-      console.error("Failed to fetch inventory:", error);
+
+  const fetchProject = async (projectID) => {
+    const projectData = await getProject(companyID, projectID);
+    if (projectData) {
+      setProjectName(projectData.name);
+      setProjectDescription(projectData.description);
+      setProjectAddress(projectData.address);
+      setProjectCity(projectData.city);
+      setProjectState(projectData.state);
+      setProjectCountry(projectData.country);
+      setProjectZipCode(projectData.zipCode);
+      setProjectManager(projectData.managerName);
+      setStartDate(new Date(projectData.startDate));
+      setEndDate(new Date(projectData.endDate));
+    } else {
+      console.log("No project data found");
     }
   };
+
+  useEffect(() => {
+    
+
+    fetchProject(project_id);
+  }, [project_id]);
 
   useEffect(() => {
     fetchInventory(companyID);
@@ -684,4 +722,4 @@ function AddProject() {
   );
 }
 
-export default AddProject;
+export default UpdateProject;

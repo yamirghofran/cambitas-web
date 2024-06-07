@@ -1,8 +1,9 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { PlusCircle } from "lucide-react";
 import ProjectItem from "../components/Projects/ProjectItem";
 import { Helmet } from "react-helmet";
 import { Link } from "react-router-dom";
+import { getAllProjects } from "../util/functions/Projects";
 
 const sampleProjects = [
   {
@@ -43,6 +44,9 @@ const sampleProjects = [
 ];
 
 
+
+
+
 const tabs = [
   { name: "Active Projects", current: true },
   { name: "Planned Projects", current: false },
@@ -53,6 +57,17 @@ function classNames(...classes) {
 }
 
 function Projects() {
+  const [projects, setProjects] = useState([]);
+
+useEffect(() => {
+  const fetchProjects = async (id) => {
+    const fetchedProjects = await getAllProjects(id);
+    setProjects(fetchedProjects);
+    console.log(fetchedProjects)
+  };
+
+  fetchProjects('123456');
+}, []);
   return (
     <>
       <Helmet><title>Projects</title></Helmet>
@@ -110,15 +125,15 @@ function Projects() {
         <div className="w-full">
           <h1 className="text-2xl my-2">Active Projects</h1>
         <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          {sampleProjects.map((project) => (
+          {projects.map((project) => (
             <ProjectItem
               key={project.id}
               id={project.id}
               coverImage={project.coverImage}
-              title={project.title}
-              location={project.location}
-              expectedEndDate={project.expectedEndDate}
-              manager={project.manager}
+              name={project.name}
+              address={project.address}
+              endDate={project.endDate}
+              managerName={project.managerName}
             />
           ))}
         </div>
