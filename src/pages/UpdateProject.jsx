@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { format } from "date-fns";
+import { format, isValid } from "date-fns";
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -51,12 +51,12 @@ import {
 import ProjectInventory from "@/components/Projects/ProjectInventory";
 import ProjectInventoryItem from "@/components/Projects/ProjectInventoryItem";
 import { Filter as FilterIcon } from "lucide-react";
-import {getAllUsers} from "@/util/functions/Users"
-import {getAllCompanyInventoryItems} from "@/util/functions/InventoryItems"
-import { updateProject } from "@/util/functions/Projects";
-import { addProjectToUser } from "@/util/functions/Users";
-import { assignProjectToInventoryItem } from "@/util/functions/InventoryItems";
+import {getAllUsers, } from "@/util/functions/Users"
+import {getAllCompanyInventoryItems, getProjectInventoryItems} from "@/util/functions/InventoryItems"
+import { updateProject } from "@/util/functions/db";
 import { toast } from "sonner";
+import { getProject } from "@/util/functions/Projects";
+
 function classNames(...classes) {
   return classes.filter(Boolean).join(' ')
 }
@@ -75,6 +75,7 @@ function ProjectInformationForm({
   projectDescription,
   setProjectDescription,
 }) {
+  console.log("Start date", startDate)
   return (
     <div className="w-full mx-auto p-6 bg-white rounded-md shadow-sm">
       <div className="mb-4">
@@ -99,7 +100,7 @@ function ProjectInformationForm({
             <Input
               id="start-date"
               placeholder="Select Date"
-              value={startDate ? format(startDate, "dd/MM/yyyy") : ''}
+              value={startDate && isValid(startDate) ? format(startDate, "dd/MM/yyyy") : ''}
               onChange={(e) => setStartDate(new Date(e.target.value))}
             />
             <Popover>
@@ -134,7 +135,7 @@ function ProjectInformationForm({
             <Input
               id="end-date"
               placeholder="Select Date"
-              value={endDate ? format(endDate, "dd/MM/yyyy") : ''}
+              value={endDate && isValid(endDate) ? format(endDate, "dd/MM/yyyy") : ''}
               onChange={(e) => setEndDate(new Date(e.target.value))}
             />
             <Popover>
@@ -202,14 +203,6 @@ function ProjectImagesForm() {
 function ProjectLocationForm({
   address,
   setAddress,
-  city,
-  setCity,
-  state,
-  setState,
-  country,
-  setCountry,
-  zipCode,
-  setZipCode,
 }) {
   return (
     <div className="w-full mx-auto p-6 bg-white rounded-md shadow-sm">
@@ -226,74 +219,6 @@ function ProjectLocationForm({
           value={address}
           onChange={(e) => setAddress(e.target.value)}
         />
-      </div>
-      <div className="grid grid-cols-2 gap-4 mb-4">
-        <div>
-          <label
-            className="block text-sm font-medium text-gray-700"
-            htmlFor="project-city"
-          >
-            City
-          </label>
-          <div className="relative mt-1 rounded-md shadow-sm">
-            <Input
-              id="project-city"
-              placeholder="Enter city"
-              value={city}
-              onChange={(e) => setCity(e.target.value)}
-            />
-          </div>
-        </div>
-        <div>
-          <label
-            className="block text-sm font-medium text-gray-700"
-            htmlFor="project-state"
-          >
-            State
-          </label>
-          <div className="relative mt-1 rounded-md shadow-sm">
-            <Input
-              id="project-state"
-              placeholder="Enter state"
-              value={state}
-              onChange={(e) => setState(e.target.value)}
-            />
-          </div>
-        </div>
-      </div>
-      <div className="grid grid-cols-2 gap-4 mb-4">
-        <div>
-          <label
-            className="block text-sm font-medium text-gray-700"
-            htmlFor="project-country"
-          >
-            Country
-          </label>
-          <div className="relative mt-1 rounded-md shadow-sm">
-            <Input
-              id="project-country"
-              placeholder="Enter country"
-              value={country}
-              onChange={(e) => setCountry(e.target.value)}
-            />
-          </div>
-        </div>
-        <div>
-          <label
-            className="block text-sm font-medium text-gray-700"
-            htmlFor="project-zip-code"
-          >
-            Zip Code
-          </label>
-          <div className="relative mt-1 rounded-md shadow-sm">
-            <Input
-              id="project-zip-code"
-              placeholder="Enter zip code"
-              value={zipCode}
-              onChange={(e) => setZipCode(e.target.value)}
-            />
-          </div>
-        </div>
       </div>
       <div className="mb-4">
         <iframe
@@ -332,7 +257,9 @@ function EmployeesTableRow({ workers, setWorkers, uid, displayName, role}) {
 }
 
 function ProjectEmployeesForm({ employees, manager, setManager, workers, setWorkers }) {
-  console.log(employees);
+  console.log("Employees", employees);
+  console.log("Workers", workers);
+  console.log("Manager", manager);
   return (
     <div className="w-full mx-auto p-6 bg-white rounded-md shadow-sm">
       <div className="mb-4">
@@ -405,7 +332,7 @@ function SelectManager({ manager, setManager, employees }) {
   );
 }
 
-function SelectProjectInventoryItem({ inventory, setInventory, item}) {
+function SelectProjectInventoryItem({ allInventory, projectInventory, setProjectInventory, item}) {
   const { 
     additionalInfo,
     categoryID,
@@ -427,15 +354,15 @@ function SelectProjectInventoryItem({ inventory, setInventory, item}) {
     uploadedBy,
    } = item;
   function handleSelect(id) {
-    if (inventory.includes(id)) {
-      setInventory(inventory.filter(item => item !== id));
+    if (projectInventory.map(projectInventoryItem => projectInventoryItem.id).includes(id)) {
+      setProjectInventory(projectInventory.filter(projectInventoryItem => projectInventoryItem.id !== id));
     } else {
-      setInventory([...inventory, id]);
+      setProjectInventory([...projectInventory, item]);
     }
   }
 
   return (
-    <div className={classNames(inventory.includes(item.id) ? "border-green-700 bg-slate-200" : "bg-white", "w-full rounded-lg border overflow-hidden")} onClick={() => handleSelect(item.id)}>
+    <div className={classNames(projectInventory.map(projectInventoryItem => projectInventoryItem.id).includes(item.id) ? "border-green-700 bg-slate-200" : "bg-white", "w-full rounded-lg border overflow-hidden")} onClick={() => handleSelect(item.id)}>
       <img
         alt={nameTrimmed}
         className="w-full h-24 object-cover"
@@ -456,7 +383,7 @@ function SelectProjectInventoryItem({ inventory, setInventory, item}) {
   )
 }
 
-function AddProjectInventory({ inventory, setInventory, availableInventory }) {
+function AddProjectInventory({ allInventory, projectInventory, setProjectInventory }) {
   return (
     <div className="bg-white p-6 rounded-md">
       <h1 className="text-2xl font-semibold mb-4">Add Inventory</h1>
@@ -470,8 +397,8 @@ function AddProjectInventory({ inventory, setInventory, availableInventory }) {
         </Button>
       </div>
       <div className="grid grid-cols-5 gap-4">
-        {availableInventory.map((item) => (
-          <SelectProjectInventoryItem key={item.id} item={item} inventory={inventory} setInventory={setInventory} />
+        {allInventory.filter(item => (item.isAvailable || projectInventory.map(item => item.id).includes(item.id)) && !item.isExpired).map((item) => (
+          <SelectProjectInventoryItem key={item.id} item={item} projectInventory={projectInventory} setProjectInventory={setProjectInventory} />
         ))}
       </div>
       <div className="flex justify-center mt-4">
@@ -481,7 +408,7 @@ function AddProjectInventory({ inventory, setInventory, availableInventory }) {
   );
 }
 
-function ProjectInventoryForm({ inventory, setInventory, availableInventory }) {
+function ProjectInventoryForm({ allInventory, projectInventory, setProjectInventory }) {
   return (
     <div className="w-full mx-auto p-6 bg-white rounded-md shadow-sm">
       <div className="w-full mb-4">
@@ -489,12 +416,12 @@ function ProjectInventoryForm({ inventory, setInventory, availableInventory }) {
           <DialogTrigger className="w-full">
             <div className="w-full rounded-md border p-2 flex justify-start">
               <p className="text-sm text-black">
-                {inventory.length > 0 ? `${inventory.map(id => availableInventory.find(item => item.id === id).name).join(', ')}` : 'Add Inventory'}
+                {projectInventory.length > 0 ? `${projectInventory.map(item => item.name).join(', ')}` : 'Add Inventory'}
               </p>
             </div>
           </DialogTrigger>
           <DialogContent className="max-w-[800px]">
-            <AddProjectInventory inventory={inventory} setInventory={setInventory} availableInventory={availableInventory} />
+            <AddProjectInventory allInventory={allInventory} projectInventory={projectInventory} setProjectInventory={setProjectInventory} />
           </DialogContent>
         </Dialog>
       </div>
@@ -529,18 +456,24 @@ function UpdateProject() {
   const [projectName, setProjectName] = useState("");
   const [projectDescription, setProjectDescription] = useState("");
   const [projectAddress, setProjectAddress] = useState("");
-  const [projectCity, setProjectCity] = useState("");
-  const [projectState, setProjectState] = useState("");
-  const [projectCountry, setProjectCountry] = useState("");
-  const [projectZipCode, setProjectZipCode] = useState("");
   const [projectManager, setProjectManager] = useState("");
   const [workers, setWorkers] = useState([]);
-  const [availableInventory, setAvailableInventory] = useState([]);
-  const [inventory, setInventory] = useState([]);
-  const [startDate, setStartDate] = useState(new Date());
-  const [endDate, setEndDate] = useState(new Date());
+  const [allInventory, setAllInventory] = useState([]);
+  const [projectInventory, setProjectInventory] = useState([]);
+  const [startDate, setStartDate] = useState(null);
+  const [endDate, setEndDate] = useState(null);
   const [employees, setEmployees] = useState([]);
   const navigate = useNavigate();
+  
+  const fetchInventory = async (companyID) => {
+    try {
+      const inventoryItems = await getAllCompanyInventoryItems(companyID); // Replace 'companyID' and 'projectID' with actual IDs
+      console.log("Inventory Items:", inventoryItems);
+      setAllInventory(inventoryItems);
+    } catch (error) {
+      console.error("Failed to fetch inventory:", error);
+    }
+  };
 
   const fetchProject = async (projectID) => {
     const projectData = await getProject(companyID, projectID);
@@ -548,27 +481,40 @@ function UpdateProject() {
       setProjectName(projectData.name);
       setProjectDescription(projectData.description);
       setProjectAddress(projectData.address);
-      setProjectCity(projectData.city);
-      setProjectState(projectData.state);
-      setProjectCountry(projectData.country);
-      setProjectZipCode(projectData.zipCode);
-      setProjectManager(projectData.managerName);
-      setStartDate(new Date(projectData.startDate));
-      setEndDate(new Date(projectData.endDate));
+      setProjectManager(projectData.managerID);
+      setStartDate(new Date(projectData.startDate.seconds * 1000));
+      setEndDate(new Date(projectData.endDate.seconds * 1000));
+      setWorkers(projectData.workersUserIDs);
+      setProjectInventory(projectData.inventoryItemIDs);
     } else {
       console.log("No project data found");
     }
   };
 
-  useEffect(() => {
-    
-
-    fetchProject(project_id);
-  }, [project_id]);
+  
 
   useEffect(() => {
     fetchInventory(companyID);
   }, []);
+
+  /* const fetchWorkers = async (companyID, projectID) => {
+    if (project_id) {
+      const fetchedWorkers = await getUsersByProjectId(companyID, projectID); // Replace 'yourCompanyID' with actual company ID
+      setWorkers(fetchedWorkers);
+      console.log("Fetched workers", fetchedWorkers);
+    }
+  }; */
+
+  const fetchProjectInventoryItems = async (companyID, projectID) => {
+    const items = await getProjectInventoryItems(companyID, projectID);
+    setProjectInventory(items);
+  };
+
+  useEffect(() => {
+    fetchProject(project_id);
+    //fetchWorkers(companyID, project_id);
+    fetchProjectInventoryItems(companyID, project_id);
+  }, [companyID, project_id]);
 
   const fetchEmployees = async (companyId) => {
     try {
@@ -584,6 +530,8 @@ function UpdateProject() {
     fetchEmployees(companyID);
   }, []);
 
+  console.log("Employees", employees);
+
   return (
     <div>
       <div className="border-b border-gray-200 py-3 sm:flex sm:items-center sm:justify-between">
@@ -593,15 +541,17 @@ function UpdateProject() {
             <p className="text-base text-slate-600">Back</p>
           </Link>
           <Circle fill="gray" strokeWidth={0} className="mx-2 h-1.5 w-1.5" />
-          <h2>Add New Project</h2>
+          <h2>Update Project</h2>
         </div>
         <div className="mt-3 flex sm:ml-4 sm:mt-0">
+          <Link to={`/projects/${project_id}`}>
           <button
             type="button"
             className="inline-flex items-center rounded bg-white px-3 py-1.5 text-sm text-black ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
           >
             Cancel
           </button>
+          </Link>
           <button
             type="button"
             onClick={async () => {
@@ -616,28 +566,20 @@ function UpdateProject() {
                 address: projectAddress,
                 managerName: employees.find(emp => emp.id === projectManager).displayName,
                 managerID: projectManager,
-                workersUserIDs: workers,
-                inventoryItemIDs: inventory,
                 imagesUrls: [], // Assuming you have a state or method to gather this
               };
               try {
-                const projectID = await addProject(companyID, projectData); // Replace 'COMP123' with actual company ID
-                for (const worker of workers) {
-                  await addProjectToUser(companyID, projectID, worker);
-                }
-                for (const item of inventory) {
-                  await assignProjectToInventoryItem(companyID, projectID, item);
-                }
-                toast.success('Project added successfully!');
+                const updatedProject = await updateProject(companyID, project_id, projectData, projectInventory.map(item => item.id), workers); // Replace 'COMP123' with actual company ID
+                toast.success('Project updated successfully!');
                 navigate('/projects');
               } catch (error) {
-                console.error('Failed to add project:', error);
-                toast.error('Failed to add project.');
+                console.error('Failed to update project:', error);
+                toast.error('Failed to update project.');
               }
             }}
             className="ml-3 inline-flex items-center rounded bg-green-800 text-white px-3 py-1.5 text-sm ring-1 ring-inset ring-gray-300 hover:bg-green-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-700"
-          >
-            Add Project
+          > 
+          Save
           </button>
         </div>
       </div>
@@ -679,14 +621,6 @@ function UpdateProject() {
           <ProjectLocationForm
             address={projectAddress}
             setAddress={setProjectAddress}
-            city={projectCity}
-            setCity={setProjectCity}
-            state={projectState}
-            setState={setProjectState}
-            country={projectCountry}
-            setCountry={setProjectCountry}
-            zipCode={projectZipCode}
-            setZipCode={setProjectZipCode}
           />
         </div>
         <div className="w-full grid grid-cols-1 md:grid-cols-[3fr_4fr_1fr] mx-auto p-6 border-b">
@@ -712,9 +646,9 @@ function UpdateProject() {
             </p>
           </div>
           <ProjectInventoryForm
-            availableInventory={availableInventory}
-            inventory={inventory}
-            setInventory={setInventory}
+            allInventory={allInventory}
+            projectInventory={projectInventory}
+            setProjectInventory={setProjectInventory}
           />
         </div>
       </div>

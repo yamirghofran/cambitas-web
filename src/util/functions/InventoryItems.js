@@ -19,6 +19,19 @@ const getAllCompanyInventoryItems = async (companyID) => {
   return itemList;
 };
 
+const getAvailableInventoryItems = async (companyID) => {
+  const inventoryCollectionRef = collection(db, "companies", companyID, "inventory");
+  const q = query(inventoryCollectionRef, where("isAvailable", "==", true), where("isExpired", "==", false));
+  const querySnapshot = await getDocs(q);
+  const itemList = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  return itemList;
+};
+
+const getInventoryItemByID = async (companyID, itemID) => {
+  const itemRef = doc(db, "companies", companyID, "inventory", itemID);
+  const docSnap = await getDoc(itemRef);
+  return docSnap.data();
+};
 
 const updateInventoryItem = async (companyID, projectID, itemID, updatedInventoryItem) => {
   const itemRef = doc(db, "companies", companyID, "projects", projectID, "inventory", itemID);
@@ -101,29 +114,6 @@ const removeProjectFromInventoryItem = async (companyID, itemID) => {
   }
 };
 
-const removeProjectFromAllInventoryItems = async (companyID, projectID) => {
-  const inventoryCollectionRef = collection(db, "companies", companyID, "inventory");
-  const q = query(inventoryCollectionRef, where("projectID", "==", projectID));
-  const querySnapshot = await getDocs(q);
-  const updates = querySnapshot.docs.map(async (doc) => {
-    const itemRef = doc.ref;
-    await updateDoc(itemRef, {
-      projectID: null,
-      currentHolderID: null,
-      currentHolderName: null,
-      currentHolderProfileImageURL: null,
-      currentLocation: { latitude: null, longitude: null },
-      isAvailable: true
-    });
-    console.log(`Project ID ${projectID} removed from inventory item ${doc.id}`);
-  });
-  await Promise.all(updates);
-  console.log("Project removed from all inventory items.");
-};
-
-
-
-
 
 const createInventoryItemObject = ({
     objectID,
@@ -168,15 +158,71 @@ const createInventoryItemObject = ({
       toolSpecifics,
     };
   };
+
+const assignInventoryItemsToProject = async (companyID, projectID, itemIDs, currentHolderID, currentHolderName, currentHolderProfileImageURL, projectLocation) => {
+  const batch = writeBatch(db);
+  const inventoryCollectionRef = collection(db, "companies", companyID, "inventory");
+
+  for (const itemID of itemIDs) {
+    const itemRef = doc(inventoryCollectionRef, itemID);
+    const itemDoc = await getDoc(itemRef);
+
+    if (itemDoc.exists()) {
+      const itemData = itemDoc.data();
+
+      if (itemData.isAvailable) {
+        batch.update(itemRef, {
+          projectID,
+          projectName: itemData.name,
+          currentLocation: projectLocation,
+          currentHolderID,
+          currentHolderName,
+          currentHolderProfileImageURL,
+          isAvailable: false,
+        });
+      } else {
+        console.warn(`Inventory item ${itemID} is not available.`);
+      }
+    } else {
+      console.warn(`Inventory item ${itemID} does not exist.`);
+    }
+  }
+
+  await batch.commit();
+  console.log("Inventory items assigned to project successfully.");
+};
+
+const removeProjectFromAllInventoryItems = async (companyID, projectID) => {
+  const inventoryCollectionRef = collection(db, "companies", companyID, "inventory");
+  const q = query(inventoryCollectionRef, where("projectID", "==", projectID));
+  const querySnapshot = await getDocs(q);
+  const updates = querySnapshot.docs.map(async (doc) => {
+    const itemRef = doc.ref;
+    await updateDoc(itemRef, {
+      projectID: null,
+      currentHolderID: null,
+      currentHolderName: null,
+      currentHolderProfileImageURL: null,
+      currentLocation: { latitude: null, longitude: null },
+      isAvailable: true
+    });
+    console.log(`Project ID ${projectID} removed from inventory item ${doc.id}`);
+  });
+  await Promise.all(updates);
+  console.log("Project removed from all inventory items.");
+};
   
 export {
   addInventoryItem,
+  getInventoryItemByID,
   getAllCompanyInventoryItems,
+  getAvailableInventoryItems,
   getProjectInventoryItems,
   assignProjectToInventoryItem,
   removeProjectFromInventoryItem,
   removeProjectFromAllInventoryItems,
   updateInventoryItem,
   deleteInventoryItem,
-  createInventoryItemObject
+  createInventoryItemObject,
+  assignInventoryItemsToProject
 }

@@ -48,14 +48,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import ProjectInventory from "@/components/Projects/ProjectInventory";
-import ProjectInventoryItem from "@/components/Projects/ProjectInventoryItem";
 import { Filter as FilterIcon } from "lucide-react";
 import {getAllUsers} from "@/util/functions/Users"
-import {getAllCompanyInventoryItems} from "@/util/functions/InventoryItems"
-import { addProject } from "@/util/functions/Projects";
-import { addProjectToUser } from "@/util/functions/Users";
-import { assignProjectToInventoryItem } from "@/util/functions/InventoryItems";
+import {getAllCompanyInventoryItems, getAvailableInventoryItems} from "@/util/functions/InventoryItems"
+import { createProject } from "@/util/functions/db";
 import { toast } from "sonner";
 function classNames(...classes) {
   return classes.filter(Boolean).join(' ')
@@ -202,14 +198,6 @@ function ProjectImagesForm() {
 function ProjectLocationForm({
   address,
   setAddress,
-  city,
-  setCity,
-  state,
-  setState,
-  country,
-  setCountry,
-  zipCode,
-  setZipCode,
 }) {
   return (
     <div className="w-full mx-auto p-6 bg-white rounded-md shadow-sm">
@@ -226,74 +214,6 @@ function ProjectLocationForm({
           value={address}
           onChange={(e) => setAddress(e.target.value)}
         />
-      </div>
-      <div className="grid grid-cols-2 gap-4 mb-4">
-        <div>
-          <label
-            className="block text-sm font-medium text-gray-700"
-            htmlFor="project-city"
-          >
-            City
-          </label>
-          <div className="relative mt-1 rounded-md shadow-sm">
-            <Input
-              id="project-city"
-              placeholder="Enter city"
-              value={city}
-              onChange={(e) => setCity(e.target.value)}
-            />
-          </div>
-        </div>
-        <div>
-          <label
-            className="block text-sm font-medium text-gray-700"
-            htmlFor="project-state"
-          >
-            State
-          </label>
-          <div className="relative mt-1 rounded-md shadow-sm">
-            <Input
-              id="project-state"
-              placeholder="Enter state"
-              value={state}
-              onChange={(e) => setState(e.target.value)}
-            />
-          </div>
-        </div>
-      </div>
-      <div className="grid grid-cols-2 gap-4 mb-4">
-        <div>
-          <label
-            className="block text-sm font-medium text-gray-700"
-            htmlFor="project-country"
-          >
-            Country
-          </label>
-          <div className="relative mt-1 rounded-md shadow-sm">
-            <Input
-              id="project-country"
-              placeholder="Enter country"
-              value={country}
-              onChange={(e) => setCountry(e.target.value)}
-            />
-          </div>
-        </div>
-        <div>
-          <label
-            className="block text-sm font-medium text-gray-700"
-            htmlFor="project-zip-code"
-          >
-            Zip Code
-          </label>
-          <div className="relative mt-1 rounded-md shadow-sm">
-            <Input
-              id="project-zip-code"
-              placeholder="Enter zip code"
-              value={zipCode}
-              onChange={(e) => setZipCode(e.target.value)}
-            />
-          </div>
-        </div>
       </div>
       <div className="mb-4">
         <iframe
@@ -506,10 +426,6 @@ function AddProject() {
   const [projectName, setProjectName] = useState("");
   const [projectDescription, setProjectDescription] = useState("");
   const [projectAddress, setProjectAddress] = useState("");
-  const [projectCity, setProjectCity] = useState("");
-  const [projectState, setProjectState] = useState("");
-  const [projectCountry, setProjectCountry] = useState("");
-  const [projectZipCode, setProjectZipCode] = useState("");
   const [projectManager, setProjectManager] = useState("");
   const [workers, setWorkers] = useState([]);
   const [availableInventory, setAvailableInventory] = useState([]);
@@ -518,9 +434,11 @@ function AddProject() {
   const [endDate, setEndDate] = useState(new Date());
   const [employees, setEmployees] = useState([]);
   const navigate = useNavigate();
+  
   const fetchInventory = async (companyID) => {
     try {
-      const inventoryItems = await getAllCompanyInventoryItems(companyID); // Replace 'companyID' and 'projectID' with actual IDs
+      const inventoryItems = await getAvailableInventoryItems(companyID); // Replace 'companyID' and 'projectID' with actual IDs
+
       console.log("Inventory Items:", inventoryItems);
       setAvailableInventory(inventoryItems);
     } catch (error) {
@@ -558,12 +476,14 @@ function AddProject() {
           <h2>Add New Project</h2>
         </div>
         <div className="mt-3 flex sm:ml-4 sm:mt-0">
-          <button
-            type="button"
-            className="inline-flex items-center rounded bg-white px-3 py-1.5 text-sm text-black ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+          <Link to="/projects">
+            <button
+              type="button"
+              className="inline-flex items-center rounded bg-white px-3 py-1.5 text-sm text-black ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
           >
             Cancel
           </button>
+          </Link>
           <button
             type="button"
             onClick={async () => {
@@ -578,18 +498,10 @@ function AddProject() {
                 address: projectAddress,
                 managerName: employees.find(emp => emp.id === projectManager).displayName,
                 managerID: projectManager,
-                workersUserIDs: workers,
-                inventoryItemIDs: inventory,
                 imagesUrls: [], // Assuming you have a state or method to gather this
               };
               try {
-                const projectID = await addProject(companyID, projectData); // Replace 'COMP123' with actual company ID
-                for (const worker of workers) {
-                  await addProjectToUser(companyID, projectID, worker);
-                }
-                for (const item of inventory) {
-                  await assignProjectToInventoryItem(companyID, projectID, item);
-                }
+                const projectID = await createProject(companyID, projectData, inventory, workers); // Replace 'COMP123' with actual company ID
                 toast.success('Project added successfully!');
                 navigate('/projects');
               } catch (error) {
@@ -641,14 +553,6 @@ function AddProject() {
           <ProjectLocationForm
             address={projectAddress}
             setAddress={setProjectAddress}
-            city={projectCity}
-            setCity={setProjectCity}
-            state={projectState}
-            setState={setProjectState}
-            country={projectCountry}
-            setCountry={setProjectCountry}
-            zipCode={projectZipCode}
-            setZipCode={setProjectZipCode}
           />
         </div>
         <div className="w-full grid grid-cols-1 md:grid-cols-[3fr_4fr_1fr] mx-auto p-6 border-b">

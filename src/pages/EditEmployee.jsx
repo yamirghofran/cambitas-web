@@ -244,14 +244,12 @@ function EditEmployee() {
           >
             Cancel
           </button>
-          <AlertDialogComponent>
           <button
             type="button"
             className="ml-3 inline-flex items-center rounded bg-green-800 text-white px-3 py-1.5 text-sm ring-1 ring-inset ring-gray-300 hover:bg-green-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-700"
           >
             Save
           </button>
-          </AlertDialogComponent>
           
         </div>
       </div>

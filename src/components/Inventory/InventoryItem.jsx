@@ -3,35 +3,35 @@ import { Link } from "react-router-dom";
 import { MapPin as MapIcon } from "lucide-react";
 import ExampleInventoryImage from "@/assets/images/inventory/drill.png";
 
+
 function InventoryItem({ key, item}) {
-  const { objectID,
+  const { objectID=1,
   itemType, // This should be a string representing the item type
-  name,
-  nameTrimmed,
-  additionalInfo,
+  name = "",
+  nameTrimmed = "",
+  additionalInfo = "",
   categoryID,
-  currentLocation,
-  currentHolderID,
-  currentHolderName,
-  currentHolderProfileImageURL,
-  dateAdded,
-  isAvailable,
-  isExpired,
-  uploadedBy,
-  imagesUrls,
-  projectID,
-  projectName,
-  materialSpecifics,
-  toolSpecifics } = item;
-  const {latitude, longitude} = currentLocation;
+  currentLocation = { latitude: null, longitude: null },
+  currentHolderID = "",
+  currentHolderName = "",
+  currentHolderProfileImageURL = "",
+  dateAdded = "",
+  isAvailable = false,
+  isExpired = false,
+  uploadedBy = "",
+  imagesUrls = [],
+  projectID = "",
+  projectName = "",
+  materialSpecifics = "",
+  toolSpecifics = "" } = item;
     return (
-      <Link to="/inventory/1">
+      <Link to={`/inventory/${objectID}`}>
       <div className="w-full min-h-full rounded-lg border overflow-hidden bg-white">
         <img
           alt="Precast concrete super cool concrete 90 cm"
           className="w-full h-24 object-cover"
           height="150"
-          src={ExampleInventoryImage}
+          src={imagesUrls? imagesUrls[0] : ExampleInventoryImage}
           style={{
             aspectRatio: "150/150",
             objectFit: "cover",
@@ -44,13 +44,13 @@ function InventoryItem({ key, item}) {
           </h3>
         </div>
         <div className="flex flex-col border-t border-dashed py-1 px-1">
-          <p className="text-sm">{projectName}</p>
-          <div className="flex items-center text-sm"><MapIcon className="h-4 w-4 mr-1.5 text-green-800"  />
+          <p className="text-sm font-semibold">{projectName}</p>
+          {/* <div className="flex items-center text-sm"><MapIcon className="h-4 w-4 mr-1.5 text-green-800"  />
           <div>
-      <p>Latitude: {latitude}</p>
-      <p>Longitude: {longitude}</p>
-    </div>
-    </div>
+            {currentLocation?.latitude && currentLocation?.longitude && <p>Latitude: {currentLocation?.latitude}</p>}
+            {currentLocation?.latitude && currentLocation?.longitude && <p>Longitude: {currentLocation?.longitude}</p>}
+          </div>
+    </div> */}
         </div>
       </div>
       </Link>

@@ -21,6 +21,7 @@ function ProjectInventory({inventoryItemIDs, projectId}) {
   useEffect(() => {
     fetchProjectInventoryItems(companyID, projectID);
   }, [companyID, projectID]);
+  console.log("Inventory",inventoryItems);
     return (
         <div className="bg-white p-6 rounded-md">
           <h1 className="text-2xl font-semibold mb-4">Using Inventory</h1>

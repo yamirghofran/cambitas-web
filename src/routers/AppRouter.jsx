@@ -20,6 +20,7 @@ import Profile from "@/pages/Profile.jsx";
 import EditProfile from "@/pages/EditProfile.jsx";
 import ScreenSize from "@/components/ScreenSize.jsx";
 import UpdateProject from "@/pages/UpdateProject.jsx";
+import AddEmployee from "@/pages/AddEmployee.jsx";
 
 const queryClient = new QueryClient();
 
@@ -37,8 +38,9 @@ function AppRouter() {
         <Route path="/projects/:project_id/update" element={<UpdateProject />} />
         <Route path="/inventory" element={<Inventory />} />
         <Route path="/inventory/add" element={<AddInventoryItem />} />
-        <Route path="/inventory/:id" element={<InventoryDetails />} />
+        <Route path="/inventory/:item_id" element={<InventoryDetails />} />
         <Route path="/employees" element={<Employees />} />
+        <Route path="/employees/add" element={<AddEmployee />} />
         <Route path="/employees/:id" element={<EmployeeProfile />} />
         <Route path="/employees/:id/edit" element={<EditEmployee />} />
         <Route path="/reports" element={<Reports />} />

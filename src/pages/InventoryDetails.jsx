@@ -1,5 +1,5 @@
-import React from "react";
-import { Link } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { Link, useParams } from "react-router-dom";
 import {
   ArrowLeft,
   Circle,
@@ -11,10 +11,6 @@ import {
 } from "lucide-react";
 import Project1CoverImage from "../assets/images/projects/cambitas-project-1.png";
 import ProfilePicture from "../assets/images/profiles/cambitas-profile-1.png";
-import ProjectSnippet from "@/components/Projects/ProjectSnippet";
-import ProjectStartEnd from "@/components/Projects/ProjectStartEnd";
-import ProjectInventory from "@/components/Projects/ProjectInventory";
-import ProjectWorkers from "@/components/Projects/ProjectWorkers";
 import { Badge } from "@/components/ui/badge";
 import CurrentHolder from "@/components/Inventory/CurrentHolder";
 import { Button } from "@/components/ui/button";
@@ -36,9 +32,14 @@ import {
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import AlertDialogComponent from "@/components/layout/AlertDialogComponent";
+import { getInventoryItemByID } from "@/util/functions/InventoryItems";
 
 const exampleDescription =
   "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.";
+
+function deleteInventoryItem() {
+  console.log("Deleting inventory item");
+}
 
 function InventoryDetails({
   coverImage = Project1CoverImage,
@@ -50,6 +51,16 @@ function InventoryDetails({
   manager = "Juan Jose",
   mapUrl = "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d243647.3160657065!2d-74.24789616611806!3d4.648283716237536!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8e3a0257c7e293b1%3A0x6f8a76e65c88d8d4!2sBogot%C3%A1!5e0!3m2!1sen!2sco!4v1597848247914!5m2!1sen!2sco",
 }) {
+  const { item_id } = useParams();
+  const [inventoryItem, setInventoryItem] = useState(null);
+  const companyID = '123456';
+  const fetchInventoryItem = async () => {
+    const inventoryItem = await getInventoryItemByID(companyID, item_id);
+    setInventoryItem(inventoryItem);
+  };
+  useEffect(() => {
+    fetchInventoryItem();
+  }, []);
   return (
     <div>
       <div className="border-b border-gray-200 py-3 sm:flex sm:items-center sm:justify-between">
@@ -59,7 +70,7 @@ function InventoryDetails({
             <p className="text-base text-slate-600">Back</p>
           </Link>
           <Circle fill="gray" strokeWidth={0} className="mx-2 h-1.5 w-1.5" />
-          <h2>{title}</h2>
+          <h2>{inventoryItem?.name}</h2>
         </div>
         <div className="mt-3 flex sm:ml-4 sm:mt-0">
           <Dialog>
@@ -95,7 +106,7 @@ function InventoryDetails({
               </Button>
             </DialogContent>
           </Dialog>
-          <AlertDialogComponent>
+          <AlertDialogComponent action={{id: "delete-inventory-item", cta: "Delete Inventory Item", text: "Are you sure you want to delete this inventory item?", function: deleteInventoryItem}}>
           <button
             type="button"
             className="inline-flex items-center rounded bg-white px-3 py-1.5 text-sm text-red-700 ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
@@ -114,7 +125,7 @@ function InventoryDetails({
       <div className="flex w-full">
         <div className="mr-4 h-full w-4/12 max-w-[520px]">
           <img
-            src={coverImage}
+            src={inventoryItem?.imagesUrls? inventoryItem?.imagesUrls[0] : coverImage}
             alt="Project Cover Image"
             className="h-[420px] rounded-lg object-cover object-center"
           />
@@ -129,8 +140,8 @@ function InventoryDetails({
                 >
                   Oak Wood
                 </Badge>
-                <h2 className="my-2 text-2xl font-semibold">{title}</h2>
-                <p className="text-base text-slate-600">{description}</p>
+                <h2 className="my-2 text-2xl font-semibold">{inventoryItem?.name}</h2>
+                <p className="text-base text-slate-600">{inventoryItem?.description}</p>
                 <p className="text-green-800 underline cursor-pointer">More</p>
                 <h3 className="mt-4 font-semibold text-lg">Details</h3>
                 <div className="grid grid-cols-3 gap-4">

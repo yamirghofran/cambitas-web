@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Search as SearchIcon, Filter as FilterIcon } from "lucide-react";
 import EmployeesTable from '@/components/Employees/EmployeesTable';
 import { getAllUsers } from '@/util/functions/Users';
+import AlertDialogComponent from '@/components/layout/AlertDialogComponent';
 
 const tabs = [
   { name: "All Employees" },

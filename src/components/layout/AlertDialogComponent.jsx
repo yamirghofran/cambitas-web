@@ -12,6 +12,7 @@ import {
   
   function AlertDialogComponent({children, action }) {
     const {
+      companyID = '123456',
       id = null,
       text = 'This action cannot be undone. This will permanently delete your project and any information inside it.',
       CTA = 'Continue',
@@ -29,7 +30,7 @@ import {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <div className="w-full items-center flex space-x-2">
-            <AlertDialogAction onClick={() => actionFunction(id)} className='w-full bg-red-600 hover:bg-red-700'>{CTA}</AlertDialogAction>
+            <AlertDialogAction onClick={() => actionFunction(companyID, id)} className='w-full bg-red-600 hover:bg-red-700'>{CTA}</AlertDialogAction>
             <AlertDialogCancel className='w-full'>Cancel</AlertDialogCancel>
             </div>
           </AlertDialogFooter>

@@ -10,7 +10,7 @@ import { Helmet } from "react-helmet";
 import { getAllCompanyInventoryItems } from '@/util/functions/InventoryItems';
 import { useState, useEffect } from 'react';
 
-
+const companyID = '123456';
 
 // Call this function where you need to fetch the inventory items
 
@@ -40,7 +40,7 @@ function Inventory() {
   };
 
   useEffect(() => {
-    fetchInventoryItems('123456');
+    fetchInventoryItems(companyID);
   }, []);
   return (
     <>

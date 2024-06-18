@@ -8,9 +8,8 @@ import ProjectStartEnd from "@/components/Projects/ProjectStartEnd";
 import ProjectInventory from "@/components/Projects/ProjectInventory";
 import ProjectWorkers from "@/components/Projects/ProjectWorkers";
 import AlertDialogComponent from "@/components/layout/AlertDialogComponent";
-import { getProject, deleteProject } from "@/util/functions/Projects";
-import { removeProjectFromAllUsers } from "@/util/functions/Users";
-import { removeProjectFromAllInventoryItems } from "@/util/functions/InventoryItems";
+import { getProject } from "@/util/functions/Projects";
+import { deleteProject } from "@/util/functions/db";
 import {formatDate} from "@/util/functions/util";
 import { Helmet } from "react-helmet";
 import { toast } from "sonner";
@@ -69,8 +68,6 @@ function ProjectDetails({}) {
   async function deleteProjectFunction() {
     try {
       await deleteProject('123456', project_id); // Assuming '123456' is the company ID
-      await removeProjectFromAllUsers('123456', project_id);
-      await removeProjectFromAllInventoryItems('123456', project_id);
       toast.success("Project deleted successfully");
       console.log("Project deleted successfully");
       navigate("/projects");
@@ -110,12 +107,14 @@ function ProjectDetails({}) {
             <Trash2 strokeWidth={2} className="mr-1.5 h-4 w-4" /> Delete
           </button>
           </AlertDialogComponent>
+          <Link to={`/projects/${project_id}/update`}>
           <button
             type="button"
             className="ml-3 inline-flex items-center rounded bg-white px-3 py-1.5 text-sm  text-black ring-1 ring-inset ring-gray-300 hover:bg-slate-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-700"
           >
             <PencilLine strokeWidth={2} className="mr-1.5 h-5 w-5" /> Edit
-          </button>
+            </button>
+          </Link>
         </div>
       </div>
       <div className="flex w-full">

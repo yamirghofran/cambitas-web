@@ -12,7 +12,19 @@ import {
   import ProfilePicture from "@/assets/images/profiles/cambitas-profile-1.png";
   import { Trash2 as TrashIcon, Pencil as PencilIcon } from "lucide-react";
 import { Link } from "react-router-dom";
+import AlertDialogComponent from "@/components/layout/AlertDialogComponent";
+import { deleteEmployee } from "@/util/functions/db";
 
+const companyID = '123456'
+
+const deleteEmployeeAction = (employeeID) => {
+  return {
+  id: employeeID,
+  text: 'This will irreversably delete this employee. Are you sure you want to proceed?',
+  CTA: 'Delete Employee',
+  actionFunction: (companyID, employeeID) => deleteEmployee(companyID, employeeID)
+  }
+}
 
   
   const sampleEmployees = [
@@ -132,14 +144,14 @@ import { Link } from "react-router-dom";
     );
   }
 
-  function EmployeesTableRow({ uid, displayName, email, role, mobileNo, profileImageUrl, avatarFallback='EM' }) {
+  function EmployeesTableRow({ uid, displayName, email, role, mobileNo, profileImageUrl }) {
     return (
       <TableRow key={uid}>
         {/* <TableCell>{uid}</TableCell> */}
         <TableCell>
           <div className="flex items-center space-x-3">
             <Avatar>
-              {profileImageUrl ? <AvatarImage alt={displayName} src={profileImageUrl} /> : <AvatarFallback>{avatarFallback}</AvatarFallback>}
+              {profileImageUrl ? <AvatarImage alt={displayName} src={profileImageUrl} /> : <AvatarFallback>{displayName.split(' ').map(name => name[0]).join('')}</AvatarFallback>}
             </Avatar>
             <div>
               <div className="font-medium">{displayName}</div>
@@ -152,7 +164,7 @@ import { Link } from "react-router-dom";
         <TableCell>
           <div className="flex items-center gap-x-4 space-x-2">
             <Link to={`/employees/${uid}/edit`}><PencilIcon className="h-5 w-5 text-gray-500 hover:cursor-pointer hover:text-black" /></Link>
-            <TrashIcon className="h-5 w-5 text-gray-500 hover:cursor-pointer hover:text-black" />
+            <AlertDialogComponent action={deleteEmployeeAction(uid)} ><TrashIcon className="h-5 w-5 text-gray-500 hover:cursor-pointer hover:text-black" /></AlertDialogComponent>
             <Link to={`/employees/${uid}`}><Button variant="ghost">View Details</Button></Link>
           </div>
         </TableCell>
