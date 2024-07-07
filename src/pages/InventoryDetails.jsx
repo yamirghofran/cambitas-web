@@ -33,6 +33,18 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import AlertDialogComponent from "@/components/layout/AlertDialogComponent";
 import { getInventoryItemByID } from "@/util/functions/InventoryItems";
+import { createRequest } from "@/util/functions/db";
+
+function createRequest(currentHolderID, currentHolderName, currentHolderProfileImageURL, currentProjectID, currentProjectName, itemID, itemName, itemImageURLs) {
+  const requestData = {
+    requesterID: currentHolderID,
+    requesterDisplayName: currentHolderName,
+    requesterProfileImageURL: currentHolderProfileImageURL,
+    recipientID: "ZmpQUSlyfuFiscvYE2ct",
+    itemID: "123456",
+  };
+  createRequest(companyID, requestData);
+}
 
 const exampleDescription =
   "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.";
@@ -56,6 +68,7 @@ function InventoryDetails({
   const companyID = '123456';
   const fetchInventoryItem = async () => {
     const inventoryItem = await getInventoryItemByID(companyID, item_id);
+    console.log(inventoryItem);
     setInventoryItem(inventoryItem);
   };
   useEffect(() => {
@@ -183,9 +196,10 @@ function InventoryDetails({
             <div className="ml-4">
               <div className="w-[300px] flex flex-col">
                 <CurrentHolder
-                  profilePicture={ProfilePicture}
-                  title={title}
-                  location={location}
+                  profilePicture={inventoryItem?.currentHolderProfileImageURL}
+                  name={inventoryItem?.currentHolderName}
+                  projectName={inventoryItem?.projectName}
+                  location={inventoryItem?.currentLocation}
                   mapUrl={mapUrl}
                 />
                 <div className="flex justify-between gap-x-4 mt-6">
@@ -193,7 +207,7 @@ function InventoryDetails({
                     variant="secondary"
                     className="text-slate-600 bg-slate-200 w-full hover:bg-slate-300 rounded-md text-sm border"
                   >
-                    Add a Request
+                    Request Item
                   </Button>
                   <Button
                     variant="primary"

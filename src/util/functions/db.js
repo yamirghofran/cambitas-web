@@ -258,6 +258,136 @@ async function deleteEmployee(companyID, employeeID) {
     }
 }
 
+// Create Request
+async function createRequest(companyID, requestData) {
+  try {
+    const requestRef = await addDoc(collection(db, 'companies', companyID, 'requests'), {
+      requesterID: requestData.requesterID,
+      requesterDisplayName: requestData.requesterDisplayName,
+      requesterEmail: requestData.requesterEmail,
+      requesterProfileImageURL: requestData.requesterProfileImageURL,
+      recipientID: requestData.recipientID,
+      recipientDisplayName: requestData.recipientDisplayName,
+      recipientEmail: requestData.recipientEmail,
+      recipientProfileImageURL: requestData.recipientProfileImageURL,
+      itemID: requestData.itemID,
+      itemName: requestData.itemName,
+      itemImageURLs: requestData.itemImageURLs,
+      currentProjectID: requestData.currentProjectID,
+      currentProjectName: requestData.currentProjectName,
+      createdAt: serverTimestamp(),
+      requestStatus: 'Request Pending'
+    });
+
+    console.log('Request created successfully');
+    return requestRef.id;
+  } catch (error) {
+    console.error('Error creating request:', error);
+    throw error;
+  }
+}
+
+// Create Request
+async function createRequest(companyID, requestData) {
+  try {
+    const requestRef = await addDoc(collection(db, 'companies', companyID, 'requests'), {
+      requesterID: requestData.requesterID,
+      recipientID: requestData.recipientID,
+      itemID: requestData.itemID,
+      createdAt: serverTimestamp(),
+      requestStatus: 'Request Pending'
+    });
+
+    console.log('Request created successfully');
+    return requestRef.id;
+  } catch (error) {
+    console.error('Error creating request:', error);
+    throw error;
+  }
+}
 
 
-export { createProject, updateProject, deleteProject, addEmployee, deleteEmployee }; 
+
+// Read Request
+async function getRequest(companyID, requestID) {
+  try {
+    const requestRef = doc(db, 'companies', companyID, 'requests', requestID);
+    const requestDoc = await getDoc(requestRef);
+
+    if (requestDoc.exists()) {
+      return { id: requestDoc.id, ...requestDoc.data() };
+    } else {
+      console.log('No such request!');
+      return null;
+    }
+  } catch (error) {
+    console.error('Error getting request:', error);
+    throw error;
+  }
+}
+
+// Update Request
+async function updateRequest(companyID, requestID, updatedData) {
+  try {
+    const requestRef = doc(db, 'companies', companyID, 'requests', requestID);
+    await updateDoc(requestRef, updatedData);
+
+    console.log('Request updated successfully');
+  } catch (error) {
+    console.error('Error updating request:', error);
+    throw error;
+  }
+}
+
+// Delete Request
+async function deleteRequest(companyID, requestID) {
+  try {
+    const requestRef = doc(db, 'companies', companyID, 'requests', requestID);
+    await deleteDoc(requestRef);
+
+    console.log('Request deleted successfully');
+  } catch (error) {
+    console.error('Error deleting request:', error);
+    throw error;
+  }
+}
+
+// Get requests made by a certain user
+async function getRequestsByRequester(companyID, requesterID) {
+  try {
+    const requestsRef = collection(db, 'companies', companyID, 'requests');
+    const q = query(requestsRef, where('requesterID', '==', requesterID));
+    const querySnapshot = await getDocs(q);
+
+    const requests = [];
+    querySnapshot.forEach((doc) => {
+      requests.push({ id: doc.id, ...doc.data() });
+    });
+
+    return requests;
+  } catch (error) {
+    console.error('Error getting requests by requester:', error);
+    throw error;
+  }
+}
+
+// Get requests made to a certain user
+async function getRequestsToRecipient(companyID, recipientID) {
+  try {
+    const requestsRef = collection(db, 'companies', companyID, 'requests');
+    const q = query(requestsRef, where('recipientID', '==', recipientID));
+    const querySnapshot = await getDocs(q);
+
+    const requests = [];
+    querySnapshot.forEach((doc) => {
+      requests.push({ id: doc.id, ...doc.data() });
+    });
+
+    return requests;
+  } catch (error) {
+    console.error('Error getting requests to recipient:', error);
+    throw error;
+  }
+}
+
+export { createProject, updateProject, deleteProject, addEmployee, deleteEmployee, createRequest, getRequest, updateRequest, deleteRequest }; 

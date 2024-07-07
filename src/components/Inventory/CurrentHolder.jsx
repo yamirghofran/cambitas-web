@@ -4,9 +4,10 @@ import { Badge } from "@/components/ui/badge";
 
 function CurrentHolder({
   profilePicture,
-  title,
+  name,
   location,
   mapUrl,
+  projectName,
 }) {
   return (
     <div className="flex h-full w-full flex-col rounded border bg-white">
@@ -17,10 +18,10 @@ function CurrentHolder({
           alt="Profile Picture"
           className="mx-2 h-10 w-10"
         />
-        <div className="flex flex-col px-1 py-2">
-          <h4 className="text-base text-white">Phoenix Baker</h4>
+        <div className="flex flex-col px-1 py-6">
+          <h4 className="text-base text-white">{name}</h4>
           <p className="text-sm text-slate-200">Manager</p>
-          <p className="text-white bg-transparent w-fit rounded-md text-xs mt-1 ">+1 12345679</p>
+          <p className="text-white bg-transparent w-fit rounded-md text-xs mt-1 hidden">+1 12345679</p>
         </div>
         </div>
         
@@ -34,8 +35,8 @@ function CurrentHolder({
             strokeWidth={1}
           />
           <div className="flex flex-col px-1 py-2">
-            <h4 className="text-base">Rejuvenation Solutions</h4>
-            <p className="text-sm text-slate-600">{location}</p>
+            <h4 className="text-base">{projectName}</h4>
+            <p className="text-sm text-slate-600">{location?.latitude}, {location?.longitude}</p>
           </div>
         </div>
       </div>
