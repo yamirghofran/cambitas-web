@@ -287,25 +287,6 @@ async function createRequest(companyID, requestData) {
   }
 }
 
-// Create Request
-async function createRequest(companyID, requestData) {
-  try {
-    const requestRef = await addDoc(collection(db, 'companies', companyID, 'requests'), {
-      requesterID: requestData.requesterID,
-      recipientID: requestData.recipientID,
-      itemID: requestData.itemID,
-      createdAt: serverTimestamp(),
-      requestStatus: 'Request Pending'
-    });
-
-    console.log('Request created successfully');
-    return requestRef.id;
-  } catch (error) {
-    console.error('Error creating request:', error);
-    throw error;
-  }
-}
-
 
 
 // Read Request
