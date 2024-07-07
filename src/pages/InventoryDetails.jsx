@@ -35,7 +35,7 @@ import AlertDialogComponent from "@/components/layout/AlertDialogComponent";
 import { getInventoryItemByID } from "@/util/functions/InventoryItems";
 import { createRequest } from "@/util/functions/db";
 
-function createRequest(currentHolderID, currentHolderName, currentHolderProfileImageURL, currentProjectID, currentProjectName, itemID, itemName, itemImageURLs) {
+function createRequestFn(currentHolderID, currentHolderName, currentHolderProfileImageURL, currentProjectID, currentProjectName, itemID, itemName, itemImageURLs) {
   const requestData = {
     requesterID: currentHolderID,
     requesterDisplayName: currentHolderName,
